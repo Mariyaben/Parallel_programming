@@ -1,0 +1,46 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <chrono>
+
+// Function to generate a random array of given size
+void generateRandomArray(int arr[], int size) {
+    for (int i = 0; i < size; ++i) {
+        arr[i] = rand() % 100; // Generates random numbers between 0 and 99
+    }
+}
+
+// Function to calculate the sum of elements in an array
+int calculateSum(int arr[], int size) {
+    int sum = 0;
+    for (int i = 0; i < size; ++i) {
+        sum += arr[i];
+    }
+    return sum;
+}
+
+int main() {
+    srand(time(0)); // Seeds the random number generator with current time
+
+    int n;
+    std::cout << "Enter the size of the array: ";
+    std::cin >> n;
+
+    int *arr = new int[n];
+    generateRandomArray(arr, n);
+
+    auto start = std::chrono::high_resolution_clock::now(); // Record the start time
+
+    int sum = calculateSum(arr, n);
+
+    auto end = std::chrono::high_resolution_clock::now(); // Record the end time
+
+    // Calculate elapsed time in milliseconds
+    double elapsed_time = std::chrono::duration<double, std::milli>(end - start).count();
+
+    std::cout << "Sum of elements: " << sum << std::endl;
+    std::cout << "Execution time: " << elapsed_time << " milliseconds" << std::endl;
+
+    delete[] arr;
+    return 0;
+}
