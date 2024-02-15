@@ -1,0 +1,94 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <thread>
+#include <vector>
+
+// Function to generate a random array of given size
+void generateRandomArray(int arr[], int size) {
+    for (int i = 0; i < size; ++i) {
+        arr[i] = rand() % 100; // Generates random numbers between 0 and 99
+    }
+}
+
+// Function to calculate the sum of elements in a portion of the array
+void calculatePartialSum(int arr[], int start, int end, int& result) {
+    int sum = 0;
+    for (int i = start; i < end; ++i) {
+        sum += arr[i];
+    }
+    result = sum;
+}
+
+// Function to search for a key element in the array
+bool searchForKey(int arr[], int size, int key) {
+    for (int i = 0; i < size; ++i) {
+        if (arr[i] == key) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int main() {
+    srand(time(0)); // Seeds the random number generator with current time
+
+    int n;
+    std::cout << "Enter the size of the array: ";
+    std::cin >> n;
+
+    int *arr = new int[n];
+    generateRandomArray(arr, n);
+
+    std::cout << "Array elements: ";
+    for (int i = 0; i < n; ++i) {
+        std::cout << arr[i] << " ";
+    }
+    std::cout << std::endl;
+
+    int key;
+    std::cout << "Enter the key element to search: ";
+    std::cin >> key;
+
+    int num_threads;
+    std::cout << "Enter the number of threads: ";
+    std::cin >> num_threads;
+
+    std::vector<std::thread> threads;
+    std::vector<int> partial_sums(num_threads);
+    int chunk_size = n / num_threads;
+
+    clock_t start = clock(); // Record the start time
+
+    for (int i = 0; i < num_threads; ++i) {
+        int start_index = i * chunk_size;
+        int end_index = (i == num_threads - 1) ? n : (i + 1) * chunk_size;
+        threads.push_back(std::thread(calculatePartialSum, arr, start_index, end_index, std::ref(partial_sums[i])));
+    }
+
+    for (std::thread& t : threads) {
+        t.join();
+    }
+
+    int total_sum = 0;
+    for (int i = 0; i < num_threads; ++i) {
+        total_sum += partial_sums[i];
+    }
+
+    bool key_found = searchForKey(arr, n, key);
+
+    clock_t end = clock(); // Record the end time
+
+    double elapsed_time = double(end - start) / CLOCKS_PER_SEC; // Calculate elapsed time in seconds
+
+    std::cout << "Sum of elements: " << total_sum << std::endl;
+    if (key_found) {
+        std::cout << "Key element found in the array." << std::endl;
+    } else {
+        std::cout << "Key element not found in the array." << std::endl;
+    }
+    std::cout << "Execution time: " << elapsed_time << " seconds" << std::endl;
+
+    delete[] arr;
+    return 0;
+}
